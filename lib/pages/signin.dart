@@ -1,5 +1,5 @@
-// ignore_for_file: prefer_const_constructors
-
+// ignore_for_file: prefer_const_constructors, non_constant_identifier_names
+import '../widgets/cancelButton.dart';
 import 'package:flutter/material.dart';
 
 class Signin extends StatefulWidget {
@@ -17,6 +17,7 @@ class _SigninState extends State<Signin> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: const Text(
               "Ingrese sus credenciales",
@@ -69,14 +70,19 @@ class _SigninState extends State<Signin> {
                   _errorLogin,
                   style: TextStyle(color: Colors.red),
                 ),
-                //_buttonLogin(),
-                SizedBox(
-                  height: 20.0,
-                ),
-                //_buttonSignIn(),
-                SizedBox(
-                  height: 20.0,
-                ),
+                Center(
+                    child: Row(
+                  children: [
+                    SizedBox(
+                      width: 40.0,
+                    ),
+                    _SignInButton(),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    CancelButton(),
+                  ],
+                ))
               ],
             ),
           )),
@@ -204,4 +210,15 @@ Widget _repeatPasswordTextField() {
       ),
     );
   });
+}
+
+Widget _SignInButton() {
+  return ElevatedButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+          minimumSize: Size(150, 50), backgroundColor: Colors.blue),
+      child: Text(
+        "Registrarte",
+        style: TextStyle(color: Colors.white, fontSize: 22),
+      ));
 }

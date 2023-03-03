@@ -24,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     _users = widget.users;
     return SafeArea(
       child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: const Text("Ingrese sus credenciales"),
             backgroundColor: Colors.blue,
