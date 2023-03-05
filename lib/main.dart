@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -69,15 +70,26 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(children: [
           Text(
-            "\n\nESCUELA POLITECNICA NACIONAL\n\nFACULTAD DE INGENIERIA ELECTRICA Y ELECTRONICA\n\nINGENIERIA EN TECNOLOGIAS DE LA INFORMACION\n\nSISTEMAS IoT\n\n APLICACION PARA LA ADMINISTRACION DE UN BASURERO INTELIGENTE",
+            "\n\nESCUELA POLITECNICA NACIONAL\nFACULTAD DE INGENIERIA ELECTRICA Y ELECTRONICA\nINGENIERIA EN TECNOLOGIAS DE LA INFORMACION\n",
             style: TextStyle(
-                fontWeight: FontWeight.normal,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
                 fontFamily: AutofillHints.addressCityAndState),
             textAlign: TextAlign.center,
           ),
           SizedBox(
-            height: 50,
+            height: 180,
+            width: 180,
+            child: Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/8/8c/Escudo_de_la_Escuela_Polit%C3%A9cnica_Nacional.png'),
+          ),
+          Text(
+            "\nAPLICACION PARA LA ADMINISTRACION DE UN BASURERO INTELIGENTE\n\nSISTEMAS IoT\n",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontFamily: AutofillHints.addressCityAndState),
+            textAlign: TextAlign.center,
           ),
           ElevatedButton(
               onPressed: () {
@@ -94,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: TextStyle(color: Colors.white, fontSize: 22),
               )),
           SizedBox(
-            height: 200.0,
+            height: 75.0,
           ),
           Divider(
             thickness: 5,

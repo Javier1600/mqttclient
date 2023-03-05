@@ -1,23 +1,34 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, file_names, prefer_interpolation_to_compose_strings
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mqttclient/pages/home.dart';
-import '../connection/mqttConnection.dart';
 
 class SensorLayout extends StatefulWidget {
-  const SensorLayout({super.key});
+  final QueryDocumentSnapshot<Object?> user;
+  final String userName;
+  const SensorLayout(this.user, this.userName, {Key? key}) : super(key: key);
 
   @override
   State<SensorLayout> createState() => _SensorLayoutState();
 }
 
 class _SensorLayoutState extends State<SensorLayout> {
+  static late QueryDocumentSnapshot<Object?> user;
+  static String _username = '';
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+    _username = widget.userName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Informacion de sensores',
+          "Bienvenido " + _username,
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -90,7 +101,7 @@ class _SensorLayoutState extends State<SensorLayout> {
                 child: Column(
                   children: [
                     Text(
-                      "\t\Humedad ",
+                      "\t\tHumedad ",
                       style:
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
@@ -155,8 +166,10 @@ class _SensorLayoutState extends State<SensorLayout> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const Home()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Home(user, user['nombre'])));
             },
             style: ElevatedButton.styleFrom(
                 minimumSize: Size(150, 50), backgroundColor: Colors.blue),

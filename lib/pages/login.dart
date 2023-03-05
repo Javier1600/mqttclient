@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, non_constant_identifier_names, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -14,14 +14,55 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static String _emailValidator = '';
-  static String _passwordValidator = '';
-  static String _errorLogin = '';
+  final TextEditingController _controllerUser = TextEditingController();
+  final TextEditingController _controllerPassword = TextEditingController();
   static List<QueryDocumentSnapshot> _users = [];
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     _users = widget.users;
+  }
+
+  @override
+  void dispose() {
+    _controllerUser.dispose();
+    _controllerPassword.dispose();
+    super.dispose();
+  }
+
+  void clearTextFields() {
+    _controllerUser.clear();
+    _controllerPassword.clear();
+  }
+
+  void loginAlert(String title, String error) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text(error),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                  minimumSize: Size(300, 50), backgroundColor: Colors.blue),
+              child: Text(
+                'Cerrar',
+                style: TextStyle(color: Colors.white, fontSize: 22),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
           resizeToAvoidBottomInset: false,
@@ -35,31 +76,131 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   height: 15.0,
                 ),
+                SizedBox(
+                  height: 150.0,
+                  width: 150.0,
+                  child: Image.network(
+                      'https://cdn-icons-png.flaticon.com/512/4046/4046321.png'),
+                ),
                 Form(
                   autovalidateMode: AutovalidateMode.always,
-                  child: _userTextField(),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: TextFormField(
+                      controller: _controllerUser,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.email),
+                        hintText: 'ejemplo@correo.com',
+                        labelText: 'Correo electronico',
+                      ),
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            !value.contains('@')) {
+                          return 'Por favor, ingrese un correo valido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 20.0,
                 ),
                 Form(
                   autovalidateMode: AutovalidateMode.always,
-                  child: _passwordTextField(),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: TextFormField(
+                      controller: _controllerPassword,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.password),
+                        hintText: 'Contraseña',
+                        labelText: 'Contraseña',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingrese su contraseña';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 20.0,
                 ),
-                Text(
-                  _errorLogin,
-                  style: TextStyle(color: Colors.red),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_controllerUser.text.isEmpty ||
+                        _controllerPassword.text.isEmpty) {
+                      loginAlert(
+                          "Error", "Ingrese valores en los campos requeridos!");
+                    } else {
+                      for (var user in _users) {
+                        String email = user['email'];
+                        String password = user['password'];
+                        if (_controllerUser.text == email) {
+                          if (_controllerPassword.text == password) {
+                            loginAlert("Inicio de sesion exitoso",
+                                "Se ha establecido sesion de forma exitosa!");
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        Home(user, user['nombre'])));
+                            clearTextFields();
+                          } else {
+                            loginAlert("Error", "Verifique sus credenciales");
+                          }
+                        }
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                    child: Text(
+                      'Iniciar sesion',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
                 ),
-                _buttonLogin(),
                 SizedBox(
                   height: 20.0,
                 ),
-                _buttonSignIn(),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Signin(_users)));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                  ),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                    child: Text(
+                      'Crear cuenta',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                ),
                 SizedBox(
-                  height: 300.0,
+                  height: 150.0,
                 ),
                 Divider(
                   thickness: 5,
@@ -78,117 +219,4 @@ class _LoginPageState extends State<LoginPage> {
           )),
     );
   }
-}
-
-Widget _userTextField() {
-  return StreamBuilder(builder: (BuildContext context, AsyncSnapshot snapshot) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextFormField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-          icon: Icon(Icons.email),
-          hintText: 'ejemplo@correo.com',
-          labelText: 'Correo electronico',
-        ),
-        validator: (value) {
-          _LoginPageState._emailValidator = value.toString();
-          if (value == null || value.isEmpty || !value.contains('@')) {
-            return 'Por favor, ingrese un correo valido';
-          }
-          _LoginPageState._errorLogin = '';
-          return null;
-        },
-      ),
-    );
-  });
-}
-
-Widget _passwordTextField() {
-  return StreamBuilder(builder: (BuildContext context, AsyncSnapshot snapshot) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextFormField(
-        keyboardType: TextInputType.emailAddress,
-        obscureText: true,
-        decoration: InputDecoration(
-          icon: Icon(Icons.password),
-          hintText: 'Contraseña',
-          labelText: 'Contraseña',
-        ),
-        validator: (value) {
-          _LoginPageState._passwordValidator = value.toString();
-          if (value == null || value.isEmpty) {
-            return 'Por favor, ingrese su contraseña';
-          }
-          _LoginPageState._errorLogin = '';
-          return null;
-        },
-      ),
-    );
-  });
-}
-
-Widget _buttonLogin() {
-  return StreamBuilder(builder: (BuildContext context, AsyncSnapshot snapshot) {
-    return ElevatedButton(
-      onPressed: () {
-        if (_LoginPageState._emailValidator.isEmpty ||
-            _LoginPageState._passwordValidator.isEmpty) {
-          _LoginPageState._errorLogin = 'Ingrese valores a los campos!';
-        } else {
-          for (var user in _LoginPageState._users) {
-            String email = user.get('email') as String;
-            String password = user.get('password') as String;
-            if (_LoginPageState._emailValidator == email) {
-              if (_LoginPageState._passwordValidator == password) {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Home()));
-              } else {
-                _LoginPageState._errorLogin = "Verifique sus credenciales";
-              }
-            } else {
-              _LoginPageState._errorLogin = "Verifique sus credenciales";
-            }
-          }
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-        child: Text(
-          'Iniciar sesion',
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
-      ),
-    );
-  });
-}
-
-Widget _buttonSignIn() {
-  return StreamBuilder(builder: (BuildContext context, AsyncSnapshot snapshot) {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const Signin()));
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-        child: Text(
-          'Crear cuenta',
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
-      ),
-    );
-  });
 }

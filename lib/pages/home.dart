@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, annotate_overrides, override_on_non_overriding_member, prefer_interpolation_to_compose_strings
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mqttclient/pages/sensorLayout.dart';
 import 'package:mqttclient/widgets/responseDialog.dart';
@@ -7,19 +8,31 @@ import 'package:mqttclient/widgets/responseDialog.dart';
 class Home extends StatefulWidget {
   static int activationController = 1;
   static String buttonTextcontroller = 'Desactivar apertura';
-  const Home({super.key});
+  final QueryDocumentSnapshot user;
+  final String userName;
+  const Home(this.user, this.userName, {Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  static late QueryDocumentSnapshot<Object?> user;
+  static String _userName = '';
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+    _userName = widget.userName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text(
-          "Bienvenido ^w^",
+        title: Text(
+          "Bienvenido " + _userName,
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -62,7 +75,8 @@ class _HomeState extends State<Home> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const SensorLayout()));
+                        builder: (context) =>
+                            SensorLayout(user, user['nombre'])));
               },
               style: ElevatedButton.styleFrom(
                   minimumSize: Size(300, 50), backgroundColor: Colors.blue),
@@ -75,7 +89,7 @@ class _HomeState extends State<Home> {
           ),
           MyAlertDialog(),
           SizedBox(
-            height: 400,
+            height: 350,
           ),
           Divider(
             thickness: 5,
