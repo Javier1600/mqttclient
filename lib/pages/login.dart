@@ -2,13 +2,9 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mqttclient/pages/home.dart';
-import 'package:mqttclient/pages/signin.dart';
 
 class LoginPage extends StatefulWidget {
-  final List<QueryDocumentSnapshot> users;
-  static String id = 'login_page';
-  const LoginPage(this.users, {Key? key}) : super(key: key);
+  const LoginPage({super.key});
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -18,10 +14,19 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _controllerPassword = TextEditingController();
   static List<QueryDocumentSnapshot> _users = [];
 
+  void getUsers() async {
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection("users");
+    QuerySnapshot users = await collectionReference.get();
+    if (users.docs.isNotEmpty) {
+      _users = users.docs;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _users = widget.users;
+    getUsers();
   }
 
   @override
@@ -147,12 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (_controllerPassword.text == password) {
                             loginAlert("Inicio de sesion exitoso",
                                 "Se ha establecido sesion de forma exitosa!");
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        Home(user, user['nombre'])));
-                            clearTextFields();
+                            Navigator.pushNamed(context, 'main');
                           } else {
                             loginAlert("Error", "Verifique sus credenciales");
                           }
@@ -180,10 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Signin(_users)));
+                    Navigator.pushNamed(context, 'signin');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,

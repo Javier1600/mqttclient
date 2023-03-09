@@ -1,38 +1,45 @@
-// ignore_for_file: prefer_const_constructors, annotate_overrides, override_on_non_overriding_member, prefer_interpolation_to_compose_strings
+// ignore_for_file: prefer_const_constructors, annotate_overrides, override_on_non_overriding_member, prefer_interpolation_to_compose_strings, unused_local_variable
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mqttclient/pages/sensorLayout.dart';
-import 'package:mqttclient/widgets/responseDialog.dart';
+import 'package:mqttclient/helpers/sensorsValuesProvider.dart';
+import 'package:mqttclient/pages/initialPage.dart';
+import 'package:provider/provider.dart';
+import '../connection/mqtt.dart';
 
 class Home extends StatefulWidget {
   static int activationController = 1;
   static String buttonTextcontroller = 'Desactivar apertura';
-  final QueryDocumentSnapshot user;
-  final String userName;
-  const Home(this.user, this.userName, {Key? key}) : super(key: key);
+
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  static late QueryDocumentSnapshot<Object?> user;
-  static String _userName = '';
   @override
   void initState() {
     super.initState();
-    user = widget.user;
-    _userName = widget.userName;
   }
 
   @override
   Widget build(BuildContext context) {
+    SensorValuesProvider state = context.watch<SensorValuesProvider>();
+    MQTTConnect client = MQTTConnect(
+        host: '192.168.43.211',
+        topicSub: 'basurero',
+        topicPub: 'apertura',
+        identifier: '',
+        state: state);
+    client.initializeMQTTClient();
+    Future.delayed(Duration.zero, () {
+      client.connect();
+    });
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          "Bienvenido " + _userName,
+          "Bienvenido ",
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -53,6 +60,11 @@ class _HomeState extends State<Home> {
           ),
           ElevatedButton(
             onPressed: () {
+              if (Home.activationController == 1) {
+                client.publish('off');
+              } else {
+                client.publish('on');
+              }
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -72,11 +84,8 @@ class _HomeState extends State<Home> {
           ),
           ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            SensorLayout(user, user['nombre'])));
+                client.disconnect();
+                Navigator.pushNamed(context, 'sensors');
               },
               style: ElevatedButton.styleFrom(
                   minimumSize: Size(300, 50), backgroundColor: Colors.blue),
@@ -87,7 +96,67 @@ class _HomeState extends State<Home> {
           SizedBox(
             height: 10,
           ),
-          MyAlertDialog(),
+          ElevatedButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(
+                      '¿Estás seguro?',
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    content: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return Text(
+                          'Se cerrará la sesion. ¿Estás seguro?',
+                        );
+                      },
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        style:
+                            TextButton.styleFrom(backgroundColor: Colors.blue),
+                        child: Text(
+                          'No',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          client.disconnect();
+                          Navigator.of(context).pop(true);
+                        },
+                        style:
+                            TextButton.styleFrom(backgroundColor: Colors.blue),
+                        child: Text(
+                          'Sí',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ).then((value) {
+                if (value == true) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MyHomePage()));
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size(300, 50), backgroundColor: Colors.blue),
+            child: Text(
+              'Cerrar Sesión',
+              style: TextStyle(color: Colors.white, fontSize: 22),
+            ),
+          ),
           SizedBox(
             height: 350,
           ),

@@ -4,9 +4,7 @@ import '../widgets/cancelButton.dart';
 import 'package:flutter/material.dart';
 
 class Signin extends StatefulWidget {
-  final List<QueryDocumentSnapshot> users;
-  const Signin(this.users, {Key? key}) : super(key: key);
-
+  const Signin({super.key});
   @override
   State<Signin> createState() => _SigninState();
 }
@@ -27,6 +25,12 @@ class _SigninState extends State<Signin> {
     _controllerP1.dispose();
     _controllerP2.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUsers();
   }
 
   void clearTextFields() {
@@ -136,12 +140,6 @@ class _SigninState extends State<Signin> {
         );
       },
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _users = widget.users;
   }
 
   @override
@@ -306,8 +304,8 @@ class _SigninState extends State<Signin> {
                             if (addHelper(_users)) {
                               print("..");
                               getUsers();
-                              for (var user in _users) {
-                                print(user.data());
+                              {
+                                Navigator.pushNamed(context, 'login');
                               }
                             }
                           }

@@ -1,8 +1,7 @@
 // ignore_for_file: prefer_const_constructors, unused_element, use_key_in_widget_constructors, file_names
 
 import 'package:flutter/material.dart';
-
-import '../main.dart';
+import 'package:mqttclient/pages/initialPage.dart';
 
 class CancelButton extends StatelessWidget {
   @override
@@ -51,7 +50,7 @@ class CancelButton extends StatelessWidget {
         ).then((value) {
           if (value == true) {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const MyApp()));
+                MaterialPageRoute(builder: (context) => const MyHomePage()));
           }
         });
       },

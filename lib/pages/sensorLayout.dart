@@ -1,34 +1,40 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, file_names, prefer_interpolation_to_compose_strings
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, file_names, prefer_interpolation_to_compose_strings, avoid_print, unused_local_variable
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mqttclient/pages/home.dart';
+import 'package:mqttclient/connection/mqtt.dart';
+import 'package:mqttclient/helpers/sensorsValuesProvider.dart';
+import 'package:provider/provider.dart';
 
 class SensorLayout extends StatefulWidget {
-  final QueryDocumentSnapshot<Object?> user;
-  final String userName;
-  const SensorLayout(this.user, this.userName, {Key? key}) : super(key: key);
+  const SensorLayout({super.key});
 
   @override
   State<SensorLayout> createState() => _SensorLayoutState();
 }
 
 class _SensorLayoutState extends State<SensorLayout> {
-  static late QueryDocumentSnapshot<Object?> user;
-  static String _username = '';
   @override
   void initState() {
     super.initState();
-    user = widget.user;
-    _username = widget.userName;
   }
 
   @override
   Widget build(BuildContext context) {
+    SensorValuesProvider state = Provider.of<SensorValuesProvider>(context);
+    MQTTConnect client = MQTTConnect(
+        host: '192.168.43.211',
+        topicSub: 'apertura',
+        topicPub: 'basurero',
+        identifier: '',
+        state: state);
+    client.initializeMQTTClient();
+    Future.delayed(Duration.zero, () {
+      client.connect();
+    });
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Bienvenido " + _username,
+          "Bienvenido ",
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -81,7 +87,7 @@ class _SensorLayoutState extends State<SensorLayout> {
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      "25.3 ºC",
+                      "${state.Temperature.toString()} ºC",
                       style: TextStyle(fontSize: 40),
                       textAlign: TextAlign.center,
                     )
@@ -107,10 +113,10 @@ class _SensorLayoutState extends State<SensorLayout> {
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      "25.3 ºC",
+                      "${state.Humidity.toString()} %",
                       style: TextStyle(fontSize: 40),
                       textAlign: TextAlign.center,
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -153,10 +159,11 @@ class _SensorLayoutState extends State<SensorLayout> {
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    "25.3 cm",
+                    "${state.Distance.toString()} cm",
                     style: TextStyle(fontSize: 40),
                     textAlign: TextAlign.center,
-                  )
+                  ),
+                  SizedBox(height: 10),
                 ],
               ),
             ),
@@ -166,10 +173,8 @@ class _SensorLayoutState extends State<SensorLayout> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Home(user, user['nombre'])));
+              client.disconnect();
+              Navigator.pushNamed(context, 'main');
             },
             style: ElevatedButton.styleFrom(
                 minimumSize: Size(150, 50), backgroundColor: Colors.blue),
@@ -179,7 +184,7 @@ class _SensorLayoutState extends State<SensorLayout> {
             ),
           ),
           SizedBox(
-            height: 120,
+            height: 50,
           ),
           Divider(
             thickness: 5,
